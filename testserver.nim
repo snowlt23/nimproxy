@@ -4,6 +4,7 @@ import asynchttpserver, asyncdispatch
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   echo req.url.path
+  echo req.url.query
   if req.url.path == "/":
     await req.respond(Http200, readFile("public/test.html"))
   elif req.url.path == "/test.js":
