@@ -25,11 +25,14 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
     return none(string)
 
 let rootpathhtmlreg = re"""(src|href)\s*=\s*"\s*(/.*?)""""
-let rootpathcssreg = re"url\(\s*(/.*?)\)"
+let rootpathcssreg = re"""url\(\s*"*(/.*?)"*\)"""
+let rootpathjsreg = re""""\s*(/.*?)""""
 proc rewriteHTMLRootPath*(src: string, basepath: string): string =
   src.replace(rootpathhtmlreg, "$#=\"/$#$#\"" % ["$1", basepath, "$2"])
 proc rewriteCSSRootPath*(src: string, basepath: string): string =
   src.replace(rootpathcssreg, "url(/$#$#)" % [basepath, "$1"])
+proc rewriteJSRootPath*(src: string, basepath: string): string =
+  src.replace(rootpathjsreg, "\"/$#$#\"" % [basepath, "$1"])
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   let
@@ -49,6 +52,8 @@ proc handler(req: Request) {.async.} =
                      resp.body.rewriteHTMLRootPath(firstpath)
                    elif ext == ".css":
                      resp.body.rewriteCSSRootPath(firstpath)
+                   elif ext == ".js":
+                     resp.body.rewriteJSRootPath(firstpath)
                    else:
                      resp.body
     await req.respond(resp.code, respbody)
