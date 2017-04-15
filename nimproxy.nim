@@ -29,10 +29,10 @@ proc debugHeaders*(headers: HttpHeaders) =
     for key, value in headers:
       echo key, ":", value
 
-let rootpathhtmlreg = re"""(src|href|action)\s*=\s*"\s*(/.*?)""""
+let rootpathhtmlreg = re"""(src|href|action)\s*=\s*("|')\s*(/.*?)("|')"""
 let rootpathcssreg = re"""url\(\s*"*(/.*?)"*\)"""
 proc rewriteHTMLRootPath*(src: string, basepath: string): string =
-  src.replace(rootpathhtmlreg, "$#=\"/$#$#\"" % ["$1", basepath, "$2"])
+  src.replace(rootpathhtmlreg, "$#=$#/$#$#$#" % ["$1", "$2", basepath, "$3", "$4"])
 proc rewriteCSSRootPath*(src: string, basepath: string): string =
   src.replace(rootpathcssreg, "url(/$#$#)" % [basepath, "$1"])
 var server = newAsyncHttpServer()
