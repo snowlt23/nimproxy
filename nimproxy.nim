@@ -31,7 +31,7 @@ proc rewriteHTMLRootPath*(src: string, basepath: string): string =
     "\"" & "/" & basepath & match.replace("\"") & "\""
 proc rewriteCSSRootPath*(src: string, basepath: string): string =
   src.replace(rootpathcssreg) do (match: string) -> string:
-    "/" & basepath & match
+    "url(/" & basepath & match.replace("url()")
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   let
