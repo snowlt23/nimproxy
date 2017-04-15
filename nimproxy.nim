@@ -34,10 +34,12 @@ proc handler(req: Request) {.async.} =
     var headers = req.headers
     headers["path"] = "/" & restpath.join("/")
     let resp = client.request(path, req.reqMethod, req.body, )
+    for key, value in resp.headers.pairs:
+      echo key, ":", value
     echo "PROXY TO: ", path
-    debugEcho resp.status
+    debugEcho resp.code
     debugEcho resp.body
-    await req.respond(resp.code, resp.body, resp.headers)
+    await req.respond(resp.code, resp.body, )
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
