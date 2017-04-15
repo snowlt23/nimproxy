@@ -88,8 +88,8 @@ proc handler(req: Request) {.async.} =
 
     debugEcho "Response:" # DEBUG:
     debugHeaders respheaders # DEBUG:
-    debugEcho "Response Body:" # DEBUG:
-    debugEcho resp.body # DEBUG:
+    # debugEcho "Response Body:" # DEBUG:
+    # debugEcho resp.body # DEBUG:
 
     await req.respond(resp.code, respbody, respheaders)
   else:
