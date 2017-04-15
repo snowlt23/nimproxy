@@ -31,8 +31,12 @@ proc rewriteRootPath*(src: string, basepath: string): string =
 
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
-  let firstpath = req.url.path.split("/")[1]
-  let restpath = req.url.path.split("/")[2..^1]
+  let
+    splittedpath = req.url.path.split("/")
+    firstpath = splittedpath[1]
+    restpath = splittedpath[2..^1]
+    lastpath = splittedpath[^1]
+    ext = lastpath.splitFile().ext
   let proxypath = findRedirectPathFromConfig(firstpath)
   if proxypath.isSome():
     var client = newHttpClient()
@@ -40,7 +44,7 @@ proc handler(req: Request) {.async.} =
     debugEcho "PROXY TO: ", path
 
     let resp = client.request(path, req.reqMethod, req.body)
-    let respbody = if resp.body.find("<html") != -1:
+    let respbody = if ext == ".html" or ext == ".css" or resp.body.find("<html") != -1:
                      resp.body.rewriteRootPath(firstpath)
                    else:
                      resp.body
