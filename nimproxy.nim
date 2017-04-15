@@ -37,6 +37,7 @@ proc rewriteCSSRootPath*(src: string, basepath: string): string =
   src.replace(rootpathcssreg, "url(/$#$#)" % [basepath, "$1"])
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
+  debugEcho "REQUEST PROXY: ", req.reqMethod, " ", req.url
   let
     splittedpath = req.url.path.split("/")
     firstpath = splittedpath[1]
@@ -56,7 +57,7 @@ proc handler(req: Request) {.async.} =
                 else:
                   "?" & req.url.query
       path = proxypath.get & relpath & query
-    debugEcho "PROXY TO: ", path
+    debugEcho "PROXY TO: ", path # DEBUG:
 
     var reqheaders = req.headers
     reqheaders.del("host")
@@ -85,7 +86,7 @@ proc handler(req: Request) {.async.} =
     debugEcho "Response:" # DEBUG:
     debugHeaders respheaders # DEBUG:
     debugEcho "Response Body:" # DEBUG:
-    debugEcho resp.body
+    debugEcho resp.body # DEBUG:
 
     await req.respond(resp.code, respbody, respheaders)
   else:
