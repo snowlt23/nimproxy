@@ -38,6 +38,7 @@ proc rewriteCSSRootPath*(src: string, basepath: string): string =
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   debugEcho "REQUEST PROXY: ", req.reqMethod, " ", req.url
+  debugEcho "REQUEST PROXY BODY: ", req.body
   let
     splittedpath = req.url.path.split("/")
     firstpath = splittedpath[1]
