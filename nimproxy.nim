@@ -24,10 +24,10 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
   else:
     return none(string)
 
-proc debugHeaders*(headers: HttpHeaders) =
+proc debugHeaders*(headers: HttpHeaders, indent = 2) =
   if not defined(release):
     for key, value in headers:
-      echo key, ":", value
+      echo " ".repeat(indent), key, ":", value
 
 let rootpathhtmlreg = re"""(src|href|action)\s*=\s*("|')\s*(/.*?)("|')"""
 let rootpathcssreg = re"""url\(\s*"*(/.*?)"*\)"""
@@ -62,14 +62,16 @@ proc handler(req: Request) {.async.} =
     reqheaders.del("host")
     reqheaders.del("accept-encoding")
     
-    debugHeaders reqheaders
+    debugEcho "Request:" # DEBUG:
+    debugHeaders reqheaders # DEBUG:
+
     var resp: Response
     try:
       resp = client.request(path, req.reqMethod, req.body, reqheaders)
     except:
       echo getCurrentExceptionMsg()
       return
-    debugEcho resp.body
+
     let respbody = if ext == ".html" or resp.body.find("<html") != -1:
                      resp.body.rewriteHTMLRootPath(firstpath)
                    elif ext == ".css":
@@ -79,7 +81,12 @@ proc handler(req: Request) {.async.} =
     var respheaders = resp.headers
     respheaders.del("content-length")
     respheaders.del("transfer-encoding")
-    debugHeaders respheaders
+
+    debugEcho "Response:" # DEBUG:
+    debugHeaders respheaders # DEBUG:
+    debugEcho "Response Body:" # DEBUG:
+    debugEcho resp.body
+
     await req.respond(resp.code, respbody, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
