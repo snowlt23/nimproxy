@@ -5,6 +5,7 @@ import strutils
 import parsecfg
 import options
 import os
+import nre
 
 const configFilename* = getHomeDir() / ".nimproxy.cfg"
 let serverconfig* = loadConfig(configFilename)
@@ -23,6 +24,11 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
   else:
     return none(string)
 
+let rootpathreg = re""""\s*/.*""""
+proc rewriteRootPath*(src: string, basepath: string): string =
+  src.replace(rootpathreg) do (match: string) -> string:
+    "/" & basepath & match.replace("\"")
+
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   let firstpath = req.url.path.split("/")[1]
@@ -33,15 +39,9 @@ proc handler(req: Request) {.async.} =
     let path = proxypath.get & "/" & restpath.join("/")
     debugEcho "PROXY TO: ", path
 
-    var reqheaders = req.headers
-    reqheaders["path"] = "/" & restpath.join("/")
     let resp = client.request(path, req.reqMethod, req.body)
 
-    var respheaders = resp.headers
-    if not defined(release):
-      for key, value in respheaders.pairs:
-        echo key, ":", value
-    await req.respond(resp.code, resp.body)
+    await req.respond(resp.code, resp.body.rewriteRootPath(firstpath))
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
