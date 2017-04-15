@@ -41,7 +41,7 @@ proc handler(req: Request) {.async.} =
     if not defined(release):
       for key, value in respheaders.pairs:
         echo key, ":", value
-    await req.respond(resp.code, resp.body, respheaders)
+    await req.respond(resp.code, resp.body)
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
