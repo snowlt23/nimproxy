@@ -24,6 +24,11 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
   else:
     return none(string)
 
+proc debugHeaders*(headers: HttpHeaders) =
+  if not defined(release):
+    for key, value in headers:
+      echo key, ":", value
+
 let rootpathhtmlreg = re"""(src|href|action)\s*=\s*"\s*(/.*?)""""
 let rootpathcssreg = re"""url\(\s*"*(/.*?)"*\)"""
 proc rewriteHTMLRootPath*(src: string, basepath: string): string =
@@ -46,6 +51,7 @@ proc handler(req: Request) {.async.} =
 
     var reqheaders = req.headers
     reqheaders.del("host")
+    debugHeaders reqheaders
     var resp: Response
     try:
       resp = client.request(path, req.reqMethod, req.body, reqheaders)
@@ -60,6 +66,7 @@ proc handler(req: Request) {.async.} =
                      resp.body
     var respheaders = resp.headers
     respheaders.del("Content-Length")
+    debugHeaders respheaders
     if resp.headers.hasKey("Set-Cookie"):
       respheaders["Set-Cookie"] = resp.headers["Set-Cookie"]
     await req.respond(resp.code, respbody, respheaders)
