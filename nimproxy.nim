@@ -34,13 +34,13 @@ proc handler(req: Request) {.async.} =
     debugEcho "PROXY TO: ", path
 
     var reqheaders = req.headers
-    headers["path"] = "/" & restpath.join("/")
-    let resp = client.request(path, req.reqMethod, req.body, )
+    reqheaders["path"] = "/" & restpath.join("/")
+    let resp = client.request(path, req.reqMethod, req.body, reqheaders)
+
     var respheaders = resp.headers
     if not defined(release):
       for key, value in respheaders.pairs:
         echo key, ":", value
-
     await req.respond(resp.code, resp.body, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
