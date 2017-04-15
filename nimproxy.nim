@@ -40,8 +40,11 @@ proc handler(req: Request) {.async.} =
     debugEcho "PROXY TO: ", path
 
     let resp = client.request(path, req.reqMethod, req.body)
-
-    await req.respond(resp.code, resp.body.rewriteRootPath(firstpath))
+    let respbody = if resp.body.find("<html") != -1:
+                     resp.body.rewriteRootPath(firstpath)
+                   else:
+                     resp.body
+    await req.respond(resp.code, respbody)
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
