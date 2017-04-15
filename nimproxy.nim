@@ -46,7 +46,16 @@ proc handler(req: Request) {.async.} =
   let proxypath = findRedirectPathFromConfig(firstpath)
   if proxypath.isSome():
     var client = newHttpClient()
-    let path = proxypath.get & "/" & restpath.join("/")
+    let
+      relpath = if restpath.join("/") == "":
+                      ""
+                    else:
+                      "/" & restpath.join("/")
+      query = if req.url.query == "":
+                  ""
+                else:
+                  "?" & req.url.query
+      path = proxypath.get & relpath & query
     debugEcho "PROXY TO: ", path
 
     var reqheaders = req.headers
