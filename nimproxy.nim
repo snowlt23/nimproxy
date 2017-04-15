@@ -24,14 +24,12 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
   else:
     return none(string)
 
-let rootpathhtmlreg = re"""(src|href)\s*=\s*"\s*/.*?""""
-let rootpathcssreg = re"url(\s*/.*?)"
+let rootpathhtmlreg = re"""(src|href)\s*=\s*"\s*(/.*?)""""
+let rootpathcssreg = re"url\(\s*(/.*?)\)"
 proc rewriteHTMLRootPath*(src: string, basepath: string): string =
-  src.replace(rootpathhtmlreg) do (match: string) -> string:
-    "\"" & "/" & basepath & match.replace("\"") & "\""
+  src.replace(rootpathhtmlreg, "$#=\"/$#$#\"" % ["$1", basepath, "$2"])
 proc rewriteCSSRootPath*(src: string, basepath: string): string =
-  src.replace(rootpathcssreg) do (match: string) -> string:
-    "url(/" & basepath & match.replace("url()")
+  src.replace(rootpathcssreg, "url(/$#$#)" % [basepath, "$1"])
 var server = newAsyncHttpServer()
 proc handler(req: Request) {.async.} =
   let
