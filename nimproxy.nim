@@ -44,14 +44,25 @@ proc handler(req: Request) {.async.} =
     let path = proxypath.get & "/" & restpath.join("/")
     debugEcho "PROXY TO: ", path
 
-    let resp = client.request(path, req.reqMethod, req.body)
+    var reqheaders = newHttpHeaders()
+    if req.headers.hasKey("Cookie"):
+      reqheaders["Cookie"] = req.headers["Cookie"]
+    var resp: Response
+    try:
+      resp = client.request(path, req.reqMethod, req.body, reqheaders)
+    except:
+      echo getCurrentExceptionMsg()
+      return
     let respbody = if ext == ".html" or resp.body.find("<html") != -1:
                      resp.body.rewriteHTMLRootPath(firstpath)
                    elif ext == ".css":
                      resp.body.rewriteCSSRootPath(firstpath)
                    else:
                      resp.body
-    await req.respond(resp.code, respbody)
+    var respheaders = newHttpHeaders()
+    if resp.headers.hasKey("Set-Cookie"):
+      reqheaders["Set-Cookie"] = req.headers["Set-Cookie"]
+    await req.respond(resp.code, respbody, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
