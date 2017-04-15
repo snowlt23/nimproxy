@@ -83,6 +83,8 @@ proc handler(req: Request) {.async.} =
     var respheaders = resp.headers
     respheaders.del("content-length")
     respheaders.del("transfer-encoding")
+    if respheaders.hasKey("location"):
+      respheaders["location"] = respheaders["location"].replace(proxypath.get, "/" & firstpath)
 
     debugEcho "Response:" # DEBUG:
     debugHeaders respheaders # DEBUG:
