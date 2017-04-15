@@ -31,11 +31,17 @@ proc handler(req: Request) {.async.} =
   if proxypath.isSome():
     var client = newHttpClient()
     let path = proxypath.get & "/" & restpath.join("/")
-    var headers = req.headers
-    headers["path"] = "/" & restpath.join("/")
     debugEcho "PROXY TO: ", path
+
+    var reqheaders = req.headers
+    headers["path"] = "/" & restpath.join("/")
     let resp = client.request(path, req.reqMethod, req.body, )
-    await req.respond(resp.code, resp.body, )
+    var respheaders = resp.headers
+    if not defined(release):
+      for key, value respheaders.pairs:
+        echo key, ":", value
+
+    await req.respond(resp.code, resp.body, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
 waitfor server.serve(getServerPort(), handler)
