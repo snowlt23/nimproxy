@@ -35,7 +35,7 @@ proc handler(req: Request) {.async.} =
 
     var reqheaders = req.headers
     reqheaders["path"] = "/" & restpath.join("/")
-    let resp = client.request(path, req.reqMethod, req.body, reqheaders)
+    let resp = client.request(path, req.reqMethod, req.body)
 
     var respheaders = resp.headers
     if not defined(release):
