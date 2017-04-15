@@ -31,9 +31,10 @@ proc handler(req: Request) {.async.} =
   if proxypath.isSome():
     var client = newHttpClient()
     let path = proxypath.get & "/" & restpath.join("/")
+    var headers = req.headers
+    headers["path"] = "/" & restpath.join("/")
+    let resp = client.request(path, req.reqMethod, req.body, )
     echo "PROXY TO: ", path
-    let resp = client.request(path, req.reqMethod, req.body, req.headers)
-    debugEcho req
     debugEcho resp.status
     debugEcho resp.body
     await req.respond(resp.code, resp.body, resp.headers)
