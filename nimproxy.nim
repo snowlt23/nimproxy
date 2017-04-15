@@ -61,7 +61,7 @@ proc handler(req: Request) {.async.} =
                      resp.body
     var respheaders = newHttpHeaders()
     if resp.headers.hasKey("Set-Cookie"):
-      reqheaders["Set-Cookie"] = req.headers["Set-Cookie"]
+      respheaders["Set-Cookie"] = resp.headers["Set-Cookie"]
     await req.respond(resp.code, respbody, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
