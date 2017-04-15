@@ -51,6 +51,7 @@ proc handler(req: Request) {.async.} =
 
     var reqheaders = req.headers
     reqheaders.del("host")
+    reqheaders.del("transfer-encoding")
     debugHeaders reqheaders
     var resp: Response
     try:
@@ -58,6 +59,7 @@ proc handler(req: Request) {.async.} =
     except:
       echo getCurrentExceptionMsg()
       return
+    debugEcho resp.body
     let respbody = if ext == ".html" or resp.body.find("<html") != -1:
                      resp.body.rewriteHTMLRootPath(firstpath)
                    elif ext == ".css":
@@ -67,8 +69,6 @@ proc handler(req: Request) {.async.} =
     var respheaders = resp.headers
     respheaders.del("Content-Length")
     debugHeaders respheaders
-    if resp.headers.hasKey("Set-Cookie"):
-      respheaders["Set-Cookie"] = resp.headers["Set-Cookie"]
     await req.respond(resp.code, respbody, respheaders)
   else:
     await req.respond(Http404, "couldn't find path")
