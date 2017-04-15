@@ -6,7 +6,7 @@ import parsecfg
 import options
 import os
 
-const configFilename* = getHomeDir() / ".nimredirector.cfg"
+const configFilename* = getHomeDir() / ".nimproxy.cfg"
 let serverconfig* = loadConfig(configFilename)
 
 proc getServerPort*(): Port =
