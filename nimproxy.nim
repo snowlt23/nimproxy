@@ -24,7 +24,7 @@ proc findRedirectPathFromConfig*(path: string): Option[string] =
   else:
     return none(string)
 
-let rootpathhtmlreg = re"""(src|href)\s*=\s*"\s*(/.*?)""""
+let rootpathhtmlreg = re"""(src|href|action)\s*=\s*"\s*(/.*?)""""
 let rootpathcssreg = re"""url\(\s*"*(/.*?)"*\)"""
 proc rewriteHTMLRootPath*(src: string, basepath: string): string =
   src.replace(rootpathhtmlreg, "$#=\"/$#$#\"" % ["$1", basepath, "$2"])
