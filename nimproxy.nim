@@ -35,6 +35,7 @@ proc handler(req: Request) {.async.} =
     let resp = client.request(path, req.reqMethod, req.body, req.headers)
     debugEcho resp.status
     debugEcho resp.body
+    debugEcho client.getContent(path)
     await req.respond(resp.code, resp.body, resp.headers)
   else:
     await req.respond(Http404, "couldn't find path")
