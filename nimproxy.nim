@@ -30,7 +30,9 @@ proc handler(req: Request) {.async.} =
   let proxypath = findRedirectPathFromConfig(firstpath)
   if proxypath.isSome():
     var client = newHttpClient()
-    let resp = client.request(proxypath.get & "/" & restpath.join("/"), req.reqMethod, req.body, req.headers)
+    let path = proxypath.get & "/" & restpath.join("/")
+    echo "PROXY TO: ", path
+    let resp = client.request(path, req.reqMethod, req.body, req.headers)
     await req.respond(resp.code, resp.body, resp.headers)
   else:
     await req.respond(Http404, "couldn't find path")
