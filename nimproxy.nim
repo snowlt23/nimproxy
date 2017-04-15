@@ -47,7 +47,7 @@ proc handler(req: Request) {.async.} =
     ext = lastpath.splitFile().ext
   let proxypath = findRedirectPathFromConfig("/" & firstpath)
   if proxypath.isSome():
-    var client = newHttpClient()
+    var client = newHttpClient(maxRedirects = 0)
     let
       relpath = if restpath.join("/") == "":
                       ""
