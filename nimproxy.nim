@@ -33,8 +33,8 @@ proc handler(req: Request) {.async.} =
     let path = proxypath.get & "/" & restpath.join("/")
     var headers = req.headers
     headers["path"] = "/" & restpath.join("/")
-    let resp = client.request(path, req.reqMethod, req.body, )
     debugEcho "PROXY TO: ", path
+    let resp = client.request(path, req.reqMethod, req.body, )
     await req.respond(resp.code, resp.body, )
   else:
     await req.respond(Http404, "couldn't find path")
