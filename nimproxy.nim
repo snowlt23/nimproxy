@@ -68,6 +68,7 @@ proc handler(req: Request) {.async.} =
                    else:
                      resp.body
     var respheaders = resp.headers
+    respheaders.del("content-length")
     respheaders.del("transfer-encoding")
     debugHeaders respheaders
     await req.respond(resp.code, respbody, respheaders)
