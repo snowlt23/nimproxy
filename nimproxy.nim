@@ -38,7 +38,7 @@ proc handler(req: Request) {.async.} =
     let resp = client.request(path, req.reqMethod, req.body, )
     var respheaders = resp.headers
     if not defined(release):
-      for key, value respheaders.pairs:
+      for key, value in respheaders.pairs:
         echo key, ":", value
 
     await req.respond(resp.code, resp.body, respheaders)
