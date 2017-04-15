@@ -44,9 +44,8 @@ proc handler(req: Request) {.async.} =
     let path = proxypath.get & "/" & restpath.join("/")
     debugEcho "PROXY TO: ", path
 
-    var reqheaders = newHttpHeaders()
-    if req.headers.hasKey("Cookie"):
-      reqheaders["Cookie"] = req.headers["Cookie"]
+    var reqheaders = req.headers
+    reqheaders.del("host")
     var resp: Response
     try:
       resp = client.request(path, req.reqMethod, req.body, reqheaders)
@@ -59,7 +58,8 @@ proc handler(req: Request) {.async.} =
                      resp.body.rewriteCSSRootPath(firstpath)
                    else:
                      resp.body
-    var respheaders = newHttpHeaders()
+    var respheaders = resp.headers
+    respheaders.del("Content-Length")
     if resp.headers.hasKey("Set-Cookie"):
       respheaders["Set-Cookie"] = resp.headers["Set-Cookie"]
     await req.respond(resp.code, respbody, respheaders)
